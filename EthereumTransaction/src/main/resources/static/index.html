@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<h lang="en">
+	<head>
+	    <meta charset="UTF-8">
+	    <title>Transactions</title>
+	    <style>
+	        table {
+	            border-collapse: collapse;
+	            width: 100%;
+	        }
+	        th, td {
+	            border: 1px solid #888;
+	            padding: 8px;
+	            text-align: left;
+	        }
+	        th {
+	            background-color: #eee;
+	        }
+	    </style>
+	</head>
+	<body>
+	
+	<h2>Transaction</h2>
+	
+	<table>
+	    <thead>
+	        <tr>
+	            <th>From</th>
+	            <th>To</th>
+	            <th>Block</th>
+	            <th>ETH</th>
+	        </tr>
+	    </thead>
+	    <tbody id="tx-body">
+			
+	    </tbody>
+	</table>
+	
+	<script>
+		let shownRows = new Set();
+	    async function loadTransaction() {
+	        try {
+	            const res = await fetch('/transaction');
+	            if (!res.ok) throw new Error("Error when loading transaction");
+	           
+				const txs = await res.json();
+	            const tbody = document.getElementById('tx-body');
+				let length = txs.length;
+				
+				for(let i = 0; i < length; i++){
+					const tx = txs[i];
+					const readHtml = createRowHtml(tx);
+					
+					
+					if(!shownRows.has(readHtml)){
+						shownRows.add(readHtml);
+						
+						const row = createRow(tx);
+						tbody.appendChild(row);
+					}
+				}
+	            
+	        } catch (err) {
+	            console.error("Error:", err);
+	        }
+	    }
+		
+		function createRowHtml(tx){
+			const from = tx.adressFrom;
+			const to = tx.adressTo;
+			const block = tx.numberOfBlock;
+			const eth = tx.eth;
+			
+	        return `<tr>
+	                <td>${from}</td>
+	                <td>${to}</td>
+	                <td>${block}</td>
+	                <td>${eth}</td>
+	            </tr>`;
+		}
+		
+		function createRow(tx) {
+		    const row = document.createElement("tr");
+		
+		    const fromCell = document.createElement("td");
+		    fromCell.textContent = tx.adressFrom;
+		
+		    const toCell = document.createElement("td");
+		    toCell.textContent = tx.adressTo;
+		
+		    const blockCell = document.createElement("td");
+		    blockCell.textContent = tx.numberOfBlock;
+		
+		    const ethCell = document.createElement("td");
+		    ethCell.textContent = tx.eth;
+		
+		    row.appendChild(fromCell);
+		    row.appendChild(toCell);
+		    row.appendChild(blockCell);
+		    row.appendChild(ethCell);
+		
+		    return row;
+		}
+	
+	    loadTransaction();
+	    setInterval(loadTransaction, 5000);
+	</script>
+</body>
+</html>
